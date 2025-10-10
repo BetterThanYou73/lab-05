@@ -7,7 +7,9 @@
 
 ## References and Resources
 
-List any resources used here, or simply put `N/A` if not applicable.
+Used stackoverflow for bugs and buy practical idea on how to solve the swipe gesture problem, and 
+how to translate addCity function to deleteCity function to reflect it on the firebase database as well.
+Another source - > Android Studio docs to get a rough idea.
 
 ## Verbal Collaboration
 

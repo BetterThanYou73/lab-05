@@ -2,9 +2,12 @@ package com.example.lab5_starter;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,6 +27,8 @@ public class MainActivity extends AppCompatActivity implements CityDialogFragmen
 
     private Button addCityButton;
     private ListView cityListView;
+
+    private GestureDetector gestureDetector;
 
     private FirebaseFirestore db;
 
@@ -93,7 +98,34 @@ public class MainActivity extends AppCompatActivity implements CityDialogFragmen
 
         });
 
+        setupSwipeDelete();
 
+
+    }
+
+    private void setupSwipeDelete() {
+        gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+            private static final int SWIPE_THRESHOLD = 100;
+            private static final int SWIPE_VELOCITY_THRESHOLD = 100;
+
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                float diffX = e2.getX() - e1.getX();
+
+                if (Math.abs(diffX) > Math.abs(e2.getY() - e1.getY())) {
+                    if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                        int position = cityListView.pointToPosition((int)e1.getX(), (int)e1.getY());
+                        if (position != ListView.INVALID_POSITION) {
+                            deleteCity(position);
+                        }
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
+
+        cityListView.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
     }
 
 
@@ -101,7 +133,14 @@ public class MainActivity extends AppCompatActivity implements CityDialogFragmen
         City cityDelete = cityArrayList.get(position);
 
 
-        DocumentReference ref = FirebaseFirestore.getInstance().getRe
+        db.collection("cities")
+                .document(cityDelete.getName())
+                .delete()
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(MainActivity.this, cityDelete.getName() + " deleted!", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(MainActivity.this, "Failed to delete!", Toast.LENGTH_SHORT).show());
 
 
     }
